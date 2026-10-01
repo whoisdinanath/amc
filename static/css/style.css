@@ -143,6 +143,25 @@ p {
   margin: 0 0 1em;
 }
 
+/* Justified body text and captions: both edges line up with figures and tables */
+section p,
+figcaption {
+  text-align: justify;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+  text-wrap: pretty;
+}
+
+.equation {
+  margin: 20px 0 24px;
+}
+
+.equation img {
+  width: auto;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
 sup {
   position: relative;
   top: -0.45em;
@@ -295,6 +314,13 @@ footer p {
 
   header {
     padding-top: 44px;
+  }
+
+  section p,
+  figcaption {
+    text-align: left;
+    -webkit-hyphens: manual;
+    hyphens: manual;
   }
 
   table {

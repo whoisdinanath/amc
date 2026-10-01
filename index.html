@@ -201,8 +201,8 @@
 
     <figure class="teaser">
       <picture>
-        <source media="(max-width: 600px)" srcset="static/images/architecture-vertical.svg" width="345" height="818">
-        <img src="static/images/architecture.svg" width="953" height="211" fetchpriority="high" alt="Pipeline: an I/Q frame is split into eight overlapping windows; each window becomes a three-channel image processed by a shared modified AlexNet; an LSTM reads the eight feature vectors; fully connected layers output probabilities for nine classes.">
+        <source media="(max-width: 600px)" srcset="static/images/architecture-vertical.svg" width="363" height="818">
+        <img src="static/images/architecture.svg" width="973" height="203" fetchpriority="high" alt="Pipeline: an I/Q frame is split into eight overlapping windows; each window becomes a three-channel image processed by a shared modified AlexNet; an LSTM reads the eight feature vectors; fully connected layers output probabilities for nine classes.">
       </picture>
       <figcaption><b>Figure 1.</b> Overview. A modified AlexNet encodes eight overlapping windows of an I/Q frame, an LSTM models them in sequence, and fully connected layers predict one of nine modulation schemes.</figcaption>
     </figure>
@@ -214,7 +214,11 @@
 
     <section id="method">
       <h2>Method</h2>
-      <p><b>Input.</b> Each frame of 1024 complex baseband samples is split into eight windows of 224 samples with 50% overlap. For every window we compute the amplitude <i>A</i>[<i>n</i>] = √(<i>I</i>[<i>n</i>]² + <i>Q</i>[<i>n</i>]²) and the phase <i>φ</i>[<i>n</i>] = atan2(<i>Q</i>[<i>n</i>], <i>I</i>[<i>n</i>]). The I/Q, amplitude and phase sequences are tiled into 224 × 224 matrices and stacked into a three-channel image in which each channel encodes one property of the signal.</p>
+      <p><b>Input.</b> Each frame of 1024 complex baseband samples is split into eight windows of 224 samples with 50% overlap. For every window we compute the amplitude and the phase:</p>
+      <figure class="equation">
+        <img src="static/images/equation.svg" width="415" height="27" alt="A[n] = sqrt(I[n]^2 + Q[n]^2), phi[n] = atan2(Q[n], I[n])">
+      </figure>
+      <p>The I/Q, amplitude and phase sequences are then tiled into 224 × 224 matrices and stacked into a three-channel image in which each channel encodes one property of the signal.</p>
       <p><b>Network.</b> A modified AlexNet, with five convolutional layers and global average pooling in place of the original fully connected layers, maps each window to a 256-dimensional vector; the same weights are used for all eight windows. An LSTM with hidden size 256 reads the eight vectors in order. Its hidden states at all eight steps are concatenated into a 2048-dimensional vector, which two fully connected layers with 512 and 256 units and a softmax output map to class probabilities (Figure 1).</p>
       <p><b>Training.</b> The network is trained end to end with cross-entropy loss and Adam for 10 epochs, with a learning rate of 1.5 × 10<sup>−4</sup>, batch size 32 and dropout 0.6. Dropout, learning rate and the width of the first fully connected layer were chosen by a hyperparameter search. The checkpoint with the lowest validation loss is used for testing.</p>
     </section>
