@@ -1,0 +1,46 @@
+# CNN-LSTM Hybrid Architecture for Over-the-Air Automatic Modulation Classification using SDR
+
+> Project page for a peer-reviewed paper by Dinanath Padhya, Krishna Acharya, Bipul Kumar Dahal and Dinesh Baniya Kshatri (Thapathali Campus, Institute of Engineering, Tribhuvan University, Nepal), published in the Journal of Innovations in Engineering Education, Vol. 8, No. 1, pp. 32–39, 2025 (DOI: 10.3126/jiee.v8i1.82136). A hybrid CNN-LSTM classifies nine modulation schemes from raw I/Q samples with 93.48% test accuracy and was tested over the air with an RTL-SDR.
+
+Key facts:
+
+- Task: automatic modulation classification (AMC) of 1024-sample complex baseband I/Q frames.
+- Classes: BPSK, QPSK, 8PSK, 16QAM, 64QAM, AM-DSB-SC, AM-SSB-SC, FM, GMSK.
+- Data: RadioML 2018.01A at SNR ≥ 0 dB combined with GNU Radio signals (AWGN-corrupted and noise-free). 779,688 frames (589,824 from RadioML, 189,864 generated); SNR 0–30 dB in 2 dB steps plus noise-free; 5,096 frames per class and SNR level; 80/10/10 split stratified by class and SNR.
+- Input: each frame is split into eight 224-sample windows with 50% overlap; each window becomes a 3 × 224 × 224 image of tiled I/Q, amplitude and phase.
+- Model: a modified AlexNet (five convolutional layers, global average pooling, 256-dimensional output, weights shared across windows) followed by an LSTM with hidden size 256 over the eight windows. The eight hidden states are concatenated (2048) and passed through fully connected layers of 512 and 256 units and a nine-way softmax.
+- Training: cross-entropy loss, Adam, learning rate 1.5e-4, batch size 32, dropout 0.6, 10 epochs. Dropout, learning rate and the width of the first fully connected layer were chosen by hyperparameter search.
+- Test-set results (macro-averaged): accuracy 93.48%, precision 93.53%, recall 93.48%, F1 93.45%. Untuned models reach 91.46% (batch size 16) and 91.34% (batch size 32); a single-head temporal attention variant reaches 93.34%. One-vs-rest AUC is at least 0.98 for every class, lowest for 16QAM (0.9848) and 64QAM (0.9855), which are also the most confused pair.
+- Over the air with an RTL-SDR: about 86% accuracy on recorded I/Q data and about 80% when classifying live.
+
+Cite as:
+
+```bibtex
+@article{padhya2025cnnlstm,
+  title   = {{CNN-LSTM} hybrid Architecture for over-the-air Automatic
+             Modulation Classification using {SDR}},
+  author  = {Padhya, Dinanath and Acharya, Krishna and Dahal, Bipul Kumar
+             and Baniya Kshatri, Dinesh},
+  journal = {Journal of Innovations in Engineering Education},
+  volume  = {8},
+  number  = {1},
+  pages   = {32--39},
+  year    = {2025},
+  doi     = {10.3126/jiee.v8i1.82136}
+}
+```
+
+## Paper
+
+- [Full text (PDF)](https://www.nepjol.info/index.php/jiee/article/download/82136/67472): Journal of Innovations in Engineering Education, Vol. 8, No. 1, 2025
+- [Article page](https://www.nepjol.info/index.php/jiee/article/view/82136): abstract, keywords and citation formats
+- [DOI: 10.3126/jiee.v8i1.82136](https://doi.org/10.3126/jiee.v8i1.82136)
+
+## Code
+
+- [Code repository](https://github.com/whoisdinanath/amc-using-cnn-lstm): PyTorch Jupyter notebooks for dataset construction, hyperparameter tuning, training, evaluation and figures (MIT License)
+- [Desktop application](https://github.com/krishna-ji/automatic-rf-identification-for-intelligent-communication-using-cnn-lstm): PyQt application used for the over-the-air tests
+
+## Optional
+
+- [Project page](https://whoisdinanath.github.io/amc/): architecture figure, confusion matrices, ROC curves and an over-the-air screenshot
