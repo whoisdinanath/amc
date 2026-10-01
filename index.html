@@ -201,10 +201,10 @@
 
     <figure class="teaser">
       <picture>
-        <source media="(max-width: 600px)" srcset="static/images/architecture-vertical.svg" width="420" height="902">
-        <img src="static/images/architecture.svg" width="1130" height="226" fetchpriority="high" alt="Pipeline: an I/Q frame is split into eight overlapping windows; each window becomes a three-channel image processed by a shared modified AlexNet; an LSTM reads the eight feature vectors; fully connected layers output probabilities for nine classes.">
+        <source media="(max-width: 600px)" srcset="static/images/architecture-vertical.svg" width="345" height="818">
+        <img src="static/images/architecture.svg" width="953" height="211" fetchpriority="high" alt="Pipeline: an I/Q frame is split into eight overlapping windows; each window becomes a three-channel image processed by a shared modified AlexNet; an LSTM reads the eight feature vectors; fully connected layers output probabilities for nine classes.">
       </picture>
-      <figcaption>A modified AlexNet encodes eight overlapping windows of an I/Q frame, an LSTM models them in sequence, and fully connected layers predict one of nine modulation schemes.</figcaption>
+      <figcaption><b>Figure 1.</b> Overview. A modified AlexNet encodes eight overlapping windows of an I/Q frame, an LSTM models them in sequence, and fully connected layers predict one of nine modulation schemes.</figcaption>
     </figure>
 
     <section id="abstract">
@@ -215,59 +215,66 @@
     <section id="method">
       <h2>Method</h2>
       <p><b>Input.</b> Each frame of 1024 complex baseband samples is split into eight windows of 224 samples with 50% overlap. For every window we compute the amplitude <i>A</i>[<i>n</i>] = √(<i>I</i>[<i>n</i>]² + <i>Q</i>[<i>n</i>]²) and the phase <i>φ</i>[<i>n</i>] = atan2(<i>Q</i>[<i>n</i>], <i>I</i>[<i>n</i>]). The I/Q, amplitude and phase sequences are tiled into 224 × 224 matrices and stacked into a three-channel image in which each channel encodes one property of the signal.</p>
-      <p><b>Network.</b> A modified AlexNet, with five convolutional layers and global average pooling in place of the original fully connected layers, maps each window to a 256-dimensional vector; the same weights are used for all eight windows. An LSTM with hidden size 256 reads the eight vectors in order. Its hidden states at all eight steps are concatenated into a 2048-dimensional vector, which two fully connected layers with 512 and 256 units and a softmax output map to class probabilities.</p>
+      <p><b>Network.</b> A modified AlexNet, with five convolutional layers and global average pooling in place of the original fully connected layers, maps each window to a 256-dimensional vector; the same weights are used for all eight windows. An LSTM with hidden size 256 reads the eight vectors in order. Its hidden states at all eight steps are concatenated into a 2048-dimensional vector, which two fully connected layers with 512 and 256 units and a softmax output map to class probabilities (Figure 1).</p>
       <p><b>Training.</b> The network is trained end to end with cross-entropy loss and Adam for 10 epochs, with a learning rate of 1.5 × 10<sup>−4</sup>, batch size 32 and dropout 0.6. Dropout, learning rate and the width of the first fully connected layer were chosen by a hyperparameter search. The checkpoint with the lowest validation loss is used for testing.</p>
     </section>
 
     <section id="data">
       <h2>Data</h2>
-      <p>The dataset combines RadioML 2018.01A with signals we generated in GNU Radio. From RadioML we keep nine classes at SNRs of 0 dB and above. The generated part adds frames corrupted with additive white Gaussian noise at the same SNR levels, and a set of noise-free frames.</p>
-      <table class="facts">
-        <tbody>
-          <tr><th scope="row">Classes</th><td>BPSK, QPSK, 8PSK, 16QAM, 64QAM, AM-DSB-SC, AM-SSB-SC, FM, GMSK</td></tr>
-          <tr><th scope="row">SNR</th><td>0 to 30 dB in 2 dB steps, plus noise-free signals</td></tr>
-          <tr><th scope="row">Frames</th><td>779,688 frames of 1024 I/Q samples: 589,824 from RadioML and 189,864 generated</td></tr>
-          <tr><th scope="row">Balance</th><td>5,096 frames for each class at each SNR level</td></tr>
-          <tr><th scope="row">Split</th><td>80 / 10 / 10 for training, validation and test, stratified by class and SNR</td></tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section id="results">
-      <h2>Results</h2>
+      <p>The dataset combines RadioML 2018.01A with signals we generated in GNU Radio and covers nine classes: BPSK, QPSK, 8PSK, 16QAM, 64QAM, AM-DSB-SC, AM-SSB-SC, FM and GMSK. From RadioML we keep frames at SNRs of 0 dB and above; the generated part adds frames with additive white Gaussian noise at the same SNR levels and a set of noise-free frames (Table 1). Every class has 5,096 frames at each of the 17 levels, and the data are split 80 / 10 / 10 for training, validation and test, stratified by class and SNR.</p>
       <figure class="table-figure">
-        <figcaption>Test-set results (%). Precision, recall and F1 are macro averages over the nine classes; the best value in each column is in bold.</figcaption>
+        <figcaption><b>Table 1.</b> Composition of the dataset. Each frame holds 1024 complex I/Q samples.</figcaption>
         <div class="table-wrap">
-          <table class="results">
+          <table>
             <thead>
-              <tr><th scope="col">Configuration</th><th scope="col">Accuracy</th><th scope="col">Precision</th><th scope="col">Recall</th><th scope="col">F1</th></tr>
+              <tr><th scope="col">Source</th><th scope="col">SNR</th><th scope="col" class="num">Frames per class and level</th><th scope="col" class="num">Frames</th></tr>
             </thead>
             <tbody>
-              <tr><td>Batch size 16</td><td>91.46</td><td>91.46</td><td>91.46</td><td>91.33</td></tr>
-              <tr><td>Batch size 32</td><td>91.34</td><td>91.47</td><td>91.34</td><td>91.30</td></tr>
-              <tr><td>Batch size 32, tuned</td><td><b>93.48</b></td><td>93.53</td><td><b>93.48</b></td><td><b>93.45</b></td></tr>
-              <tr><td>Single-head attention</td><td>93.34</td><td><b>93.56</b></td><td>93.34</td><td>93.22</td></tr>
+              <tr><td>RadioML 2018.01A</td><td>0 to 30 dB, 2 dB steps</td><td class="num">4,096</td><td class="num">589,824</td></tr>
+              <tr><td>GNU Radio, AWGN</td><td>0 to 30 dB, 2 dB steps</td><td class="num">1,000</td><td class="num">144,000</td></tr>
+              <tr><td>GNU Radio, noise-free</td><td>Noise-free</td><td class="num">5,096</td><td class="num">45,864</td></tr>
+              <tr class="total"><td>Total</td><td>17 levels</td><td class="num">5,096</td><td class="num">779,688</td></tr>
             </tbody>
           </table>
         </div>
       </figure>
-      <p>Tuning adds about two points over the untuned models. Most of the remaining errors are between 16QAM and 64QAM, whose constellations overlap at low SNR. The attention variant replaces the concatenation of LSTM states with single-head temporal attention, which averages them into one 256-dimensional vector. Its accuracy is similar, but it confuses AM-DSB-SC with AM-SSB-SC far more often.</p>
-      <figure class="wide">
-        <a href="static/images/confusion_matrices.webp"><img src="static/images/confusion_matrices.webp" width="2678" height="1189" loading="lazy" decoding="async" alt="Test-set confusion matrices of the tuned CNN-LSTM and the attention variant."></a>
-        <figcaption>Test-set confusion matrices for (a) the tuned CNN-LSTM and (b) the attention variant. Classes: 0 BPSK, 1 QPSK, 2 8PSK, 3 16QAM, 4 64QAM, 5 AM-DSB-SC, 6 AM-SSB-SC, 7 FM, 8 GMSK.</figcaption>
+    </section>
+
+    <section id="results">
+      <h2>Results</h2>
+      <p>Table 2 lists the test-set results. Tuning adds about two points over the untuned models. Most of the remaining errors are between 16QAM and 64QAM, whose constellations overlap at low SNR (Figure 2a). The attention variant replaces the concatenation of LSTM states with single-head temporal attention, which averages them into one 256-dimensional vector. Its accuracy is similar, but it confuses AM-DSB-SC with AM-SSB-SC far more often (Figure 2b), which also lowers its AUC for those classes (Figure 3b).</p>
+      <figure class="table-figure">
+        <figcaption><b>Table 2.</b> Test-set results (%). Precision, recall and F1 are macro averages over the nine classes; the best value in each column is in bold.</figcaption>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th scope="col">Configuration</th><th scope="col" class="num">Accuracy</th><th scope="col" class="num">Precision</th><th scope="col" class="num">Recall</th><th scope="col" class="num">F1</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Batch size 16</td><td class="num">91.46</td><td class="num">91.46</td><td class="num">91.46</td><td class="num">91.33</td></tr>
+              <tr><td>Batch size 32</td><td class="num">91.34</td><td class="num">91.47</td><td class="num">91.34</td><td class="num">91.30</td></tr>
+              <tr><td>Batch size 32, tuned</td><td class="num"><b>93.48</b></td><td class="num">93.53</td><td class="num"><b>93.48</b></td><td class="num"><b>93.45</b></td></tr>
+              <tr><td>Single-head attention</td><td class="num">93.34</td><td class="num"><b>93.56</b></td><td class="num">93.34</td><td class="num">93.22</td></tr>
+            </tbody>
+          </table>
+        </div>
       </figure>
-      <figure class="wide">
+      <figure>
+        <a href="static/images/confusion_matrices.webp"><img src="static/images/confusion_matrices.webp" width="2678" height="1189" loading="lazy" decoding="async" alt="Test-set confusion matrices of the tuned CNN-LSTM and the attention variant."></a>
+        <figcaption><b>Figure 2.</b> Test-set confusion matrices for (a) the tuned CNN-LSTM and (b) the attention variant. Classes: 0&nbsp;BPSK, 1&nbsp;QPSK, 2&nbsp;8PSK, 3&nbsp;16QAM, 4&nbsp;64QAM, 5&nbsp;AM-DSB-SC, 6&nbsp;AM-SSB-SC, 7&nbsp;FM, 8&nbsp;GMSK.</figcaption>
+      </figure>
+      <figure>
         <a href="static/images/roc_curves.webp"><img src="static/images/roc_curves.webp" width="2790" height="1189" loading="lazy" decoding="async" alt="Per-class ROC curves of the tuned CNN-LSTM and the attention variant."></a>
-        <figcaption>One-vs-rest ROC curves for (a) the tuned CNN-LSTM and (b) the attention variant. With the tuned model every class reaches an AUC of at least 0.98; the lowest values are for 16QAM (0.9848) and 64QAM (0.9855).</figcaption>
+        <figcaption><b>Figure 3.</b> One-vs-rest ROC curves for (a) the tuned CNN-LSTM and (b) the attention variant. With the tuned model every class reaches an AUC of at least 0.98; the lowest values are for 16QAM (0.9848) and 64QAM (0.9855).</figcaption>
       </figure>
     </section>
 
     <section id="over-the-air">
       <h2>Over-the-air test</h2>
-      <p>We also ran the model on signals received with an RTL-SDR, both from a custom-built FM transmitter and from commercial broadcasts. Accuracy was about 86% on recorded I/Q data and about 80% when classifying live. We attribute the drop from the benchmark accuracy to multipath fading, Doppler shifts and carrier frequency offset in real channels. The desktop application used for these tests is available in a <a href="https://github.com/krishna-ji/automatic-rf-identification-for-intelligent-communication-using-cnn-lstm">separate repository</a>.</p>
-      <figure class="wide screenshot">
+      <p>We also ran the model on signals received with an RTL-SDR, both from a custom-built FM transmitter and from commercial broadcasts. Accuracy was about 86% on recorded I/Q data and about 80% when classifying live. We attribute the drop from the benchmark accuracy to multipath fading, Doppler shifts and carrier frequency offset in real channels. The desktop application used for these tests (Figure 4) is available in a <a href="https://github.com/krishna-ji/automatic-rf-identification-for-intelligent-communication-using-cnn-lstm">separate repository</a>.</p>
+      <figure class="screenshot">
         <a href="static/images/ota_demo.webp"><img src="static/images/ota_demo.webp" width="1920" height="986" loading="lazy" decoding="async" alt="Desktop application showing constellation, spectrum, time-domain and waterfall plots of a live FM signal, with class probabilities favouring FM."></a>
-        <figcaption>The desktop application classifying a live FM signal at 96.6 MHz received with an RTL-SDR. The application’s classifier also covers GFSK, so it has ten outputs instead of nine.</figcaption>
+        <figcaption><b>Figure 4.</b> The desktop application classifying a live FM signal at 96.6 MHz received with an RTL-SDR. The application’s classifier also covers GFSK, so it has ten outputs instead of nine.</figcaption>
       </figure>
     </section>
 

@@ -6,7 +6,7 @@
   --link: #1f5fbf;
   --surface: #f6f8fa;
   --dark: #24292f;
-  --prose: 760px;
+  --column: 840px; /* text, figures, tables and captions all share this width */
 }
 
 *,
@@ -45,8 +45,9 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
-main {
-  max-width: 1000px;
+main,
+footer {
+  max-width: calc(var(--column) + 48px);
   margin: 0 auto;
   padding: 0 24px;
 }
@@ -54,18 +55,21 @@ main {
 /* Header */
 
 header {
-  padding: 72px 0 36px;
+  padding: 72px 0 40px;
   text-align: center;
 }
 
 h1 {
-  max-width: 900px;
-  margin: 0 auto 24px;
-  font-size: clamp(1.7rem, 1.1rem + 2.2vw, 2.45rem);
+  margin: 0 0 24px;
+  font-size: clamp(1.65rem, 1.15rem + 2vw, 2.15rem);
   font-weight: 600;
   line-height: 1.22;
   letter-spacing: -0.015em;
   text-wrap: balance;
+}
+
+.nowrap {
+  white-space: nowrap;
 }
 
 .authors {
@@ -76,10 +80,6 @@ h1 {
 .authors span {
   display: inline-block;
   margin: 0 0.2em;
-}
-
-.nowrap {
-  white-space: nowrap;
 }
 
 .affiliation,
@@ -128,31 +128,19 @@ h1 {
 /* Sections */
 
 section {
-  padding: 40px 0 8px;
-}
-
-section > * {
-  max-width: var(--prose);
-  margin-left: auto;
-  margin-right: auto;
-}
-
-section > .wide {
-  max-width: none;
+  padding-top: 48px;
 }
 
 h2 {
-  margin-top: 0;
-  margin-bottom: 18px;
-  font-size: 1.55rem;
+  margin: 0 0 16px;
+  font-size: 1.5rem;
   font-weight: 600;
   letter-spacing: -0.01em;
   text-align: center;
 }
 
 p {
-  margin-top: 0;
-  margin-bottom: 1em;
+  margin: 0 0 1em;
 }
 
 sup {
@@ -163,10 +151,10 @@ sup {
   vertical-align: baseline;
 }
 
-/* Figures */
+/* Figures and tables: full column width, numbered captions */
 
 figure {
-  margin: 28px auto;
+  margin: 32px 0;
 }
 
 figure img {
@@ -176,25 +164,23 @@ figure img {
 }
 
 figcaption {
-  max-width: var(--prose);
-  margin: 12px auto 0;
+  margin-top: 12px;
   color: var(--muted);
   font-size: 0.92rem;
   line-height: 1.55;
 }
 
-.teaser {
-  margin-top: 8px;
+figcaption b {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.table-figure figcaption {
+  margin: 0 0 12px;
 }
 
 .screenshot img {
   border-radius: 6px;
-}
-
-/* Tables */
-
-.table-figure figcaption {
-  margin: 0 0 10px;
 }
 
 .table-wrap {
@@ -210,55 +196,40 @@ table {
 
 th,
 td {
-  padding: 7px 12px;
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
 }
 
-.results th,
-.results td {
+th:first-child,
+td:first-child {
+  padding-left: 0;
+}
+
+th:last-child,
+td:last-child {
+  padding-right: 0;
+}
+
+thead th {
+  border-top: 1.5px solid var(--text);
+  border-bottom: 1px solid var(--text);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+tbody tr:last-child td {
+  border-bottom: 1.5px solid var(--text);
+}
+
+.num {
   text-align: right;
   white-space: nowrap;
 }
 
-.results th:first-child,
-.results td:first-child {
-  padding-left: 0;
-  text-align: left;
-}
-
-.results th:last-child,
-.results td:last-child {
-  padding-right: 0;
-}
-
-.results thead th {
-  border-top: 1.5px solid var(--text);
-  border-bottom: 1px solid var(--text);
+tr.total td {
+  border-top: 1px solid var(--text);
   font-weight: 600;
-}
-
-.results tbody tr:last-child td {
-  border-bottom: 1.5px solid var(--text);
-}
-
-.facts {
-  margin-top: 8px;
-}
-
-.facts th {
-  width: 1%;
-  padding-left: 0;
-  font-weight: 600;
-  text-align: left;
-  vertical-align: top;
-  white-space: nowrap;
-}
-
-.facts td {
-  padding-right: 0;
-}
-
-.facts tr + tr > * {
-  border-top: 1px solid var(--rule);
 }
 
 /* Citation */
@@ -304,10 +275,8 @@ code {
 /* Footer */
 
 footer {
-  max-width: var(--prose);
-  margin: 48px auto 0;
-  padding: 24px 24px 56px;
-  border-top: 1px solid var(--rule);
+  margin-top: 56px;
+  padding-bottom: 56px;
   color: var(--muted);
   font-size: 0.85rem;
   text-align: center;
@@ -315,6 +284,8 @@ footer {
 
 footer p {
   margin: 0;
+  padding-top: 24px;
+  border-top: 1px solid var(--rule);
 }
 
 @media (max-width: 600px) {
@@ -326,17 +297,18 @@ footer p {
     padding-top: 44px;
   }
 
-  .results {
+  table {
     font-size: 0.85rem;
   }
 
-  .results th,
-  .results td {
+  th,
+  td {
     padding-left: 5px;
     padding-right: 5px;
   }
 
-  .results td:first-child {
+  thead th,
+  thead th.num {
     white-space: normal;
   }
 }
